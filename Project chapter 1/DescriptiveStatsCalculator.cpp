@@ -11,8 +11,10 @@
 #include "DescriptiveStatsCalculator.h"
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::string;
 
@@ -27,7 +29,7 @@ DescriptiveStatsCalculator::DescriptiveStatsCalculator()
 
 DescriptiveStatsCalculator::DescriptiveStatsCalculator(int initialCapacity)
     : data(nullptr), size(0), capacity(initialCapacity > 0 ? initialCapacity : DEFAULT_CAPACITY),
-      datasetType(DatasetType::SAMPLE) {
+    datasetType(DatasetType::SAMPLE) {
     data = new double[capacity];
 }
 
@@ -92,7 +94,8 @@ int DescriptiveStatsCalculator::findInsertPosition(double value) const {
         int mid = low + (high - low) / 2;
         if (data[mid] < value) {
             low = mid + 1;
-        } else {
+        }
+        else {
             high = mid;
         }
     }
@@ -118,8 +121,9 @@ void DescriptiveStatsCalculator::insertValues(const double values[], int count) 
 }
 
 bool DescriptiveStatsCalculator::deleteValue(double value) {
+    const double EPSILON = 1e-9;
     for (int i = 0; i < size; ++i) {
-        if (data[i] == value) {
+        if (std::abs(data[i] - value) < EPSILON) {
             for (int j = i; j < size - 1; ++j) {
                 data[j] = data[j + 1];
             }
@@ -136,7 +140,8 @@ int DescriptiveStatsCalculator::deleteAllOccurrences(double value) {
     for (int readIndex = 0; readIndex < size; ++readIndex) {
         if (data[readIndex] == value) {
             ++removed;
-        } else {
+        }
+        else {
             data[writeIndex++] = data[readIndex];
         }
     }
@@ -182,18 +187,39 @@ const double* DescriptiveStatsCalculator::getArrayAddress() const {
 // ---------------------------------------------------------------------
 
 double DescriptiveStatsCalculator::findMinimum() const {
-    cout << "[Not yet implemented: findMinimum]" << endl;
-    return 0.0;
+    // Precondition: size >= 1 (enforced by caller via a size check before
+    // calling this; this defensive check exists in case that contract is
+    // ever violated, so we fail loudly instead of reading out-of-bounds).
+    if (size < 1) {
+        cerr << "ERROR: findMinimum requires at least 1 value in the dataset." << endl;
+        return 0.0;
+    }
+    // Postcondition: data[] is kept sorted ascending at all times by
+    // insertValue(), so the minimum is always the first element -- no
+    // scan or sort needed, just read index 0.
+    return data[0];
 }
 
 double DescriptiveStatsCalculator::findMaximum() const {
-    cout << "[Not yet implemented: findMaximum]" << endl;
-    return 0.0;
+    // Precondition: size >= 1.
+    if (size < 1) {
+        cerr << "ERROR: findMaximum requires at least 1 value in the dataset." << endl;
+        return 0.0;
+    }
+    // Postcondition: since data[] is sorted ascending, the maximum is
+    // always the last occupied element, data[size - 1].
+    return data[size - 1];
 }
 
 double DescriptiveStatsCalculator::findRange() const {
-    cout << "[Not yet implemented: findRange]" << endl;
-    return 0.0;
+    // Precondition: size >= 1.
+    if (size < 1) {
+        cerr << "ERROR: findRange requires at least 1 value in the dataset." << endl;
+        return 0.0;
+    }
+    // Postcondition: range = max - min. Reuses findMaximum()/findMinimum()
+    // rather than duplicating the O(1) sorted-array lookups.
+    return findMaximum() - findMinimum();
 }
 
 int DescriptiveStatsCalculator::findSize() const {

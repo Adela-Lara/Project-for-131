@@ -1,24 +1,27 @@
 // ============================================================================
 // main.cpp
-//
+//  this is the menu loop
 // ============================================================================
 
 #include <iostream>
-#include <limits>
-#include <string>
 #include "DescriptiveStatsCalculator.h"
+#include "input.h"
 
-using std::cin;
 using std::cout;
 using std::endl;
 using std::string;
 
+// Every character the menu currently accepts. Passed to inputChar() so it
+// rejects anything outside this set before main() ever sees the value.
+static const string VALID_MENU_OPTIONS = "0123ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 // Precondition:  none.
+// Postcondition: the main menu text has been printed to standard output.
 static void printMenu() {
     cout << "\nDescriptive Statistics Calculator Main Menu\n";
     cout << "========================================================================\n";
     cout << " 0. Exit\n";
-    cout << " 1. Configure Dataset to Sample or Polulation\n";
+    cout << " 1. Configure Dataset to Sample or Population\n";
     cout << " 2. Insert sort value(s) to the Dataset\n";
     cout << " 3. Delete value(s) from the Dataset\n";
     cout << "------------------------------------------------------------------------\n";
@@ -36,37 +39,32 @@ static void printMenu() {
     cout << " L. Find Quartiles                     Y. Display ALL statical results\n";
     cout << " M. Find Interquartile Range            Z. Output ALL statical results to text file\n";
     cout << "========================================================================\n\n";
-    cout << "Option: ";
 }
 
 // Precondition:  none.
-// Postcondition: clears any error flags on cin and discards the rest of
-//                the current input line, leaving the stream ready for a
-//                fresh read.
-static void clearInput() {
-    cin.clear();
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-}
-
-// Precondition:  none.
-// Postcondition: prompts the user for how many values to insert, reads
-//                that many doubles, and inserts each into calc.
-static void handleInsert(DescriptiveStatsCalculator& calc) {
-    cout << "How many value(s) would you like to insert? ";
-    int count;
-    if (!(cin >> count) || count <= 0) {
-        cout << "Invalid count.\n";
-        clearInput();
-        return;
+// Postcondition: returns true and prints nothing if calc.getSize() >=
+//                requiredSize; otherwise prints an error explaining the
+//                shortfall and returns false. Callers must skip the
+//                operation when this returns false.
+static bool hasEnoughData(const DescriptiveStatsCalculator& calc, int requiredSize, const string& operationName) {
+    if (calc.getSize() < requiredSize) {
+        cout << "ERROR: " << operationName << " requires at least "
+            << requiredSize << " value(s); dataset currently has "
+            << calc.getSize() << ".\n";
+        return false;
     }
+    return true;
+}
+
+// Precondition:  none.
+// Postcondition: prompts (via inputInteger/inputDouble) for how many
+//                values to insert and their values, then inserts each
+//                into calc in its correct sorted position.
+static void handleInsert(DescriptiveStatsCalculator& calc) {
+    int count = inputInteger("How many value(s) would you like to insert? ", true); // true = must be positive
     for (int i = 0; i < count; ++i) {
-        cout << "  Value " << (i + 1) << ": ";
-        double value;
-        if (!(cin >> value)) {
-            cout << "Invalid value, stopping insertion.\n";
-            clearInput();
-            return;
-        }
+        string prompt = "  Value " + std::to_string(i + 1) + ": ";
+        double value = inputDouble(prompt);
         calc.insertValue(value);
     }
     cout << "Inserted. Dataset is now: ";
@@ -74,16 +72,10 @@ static void handleInsert(DescriptiveStatsCalculator& calc) {
 }
 
 // Precondition:  none.
-// Postcondition: prompts the user for a value and removes its first
-//                occurrence from calc if present.
+// Postcondition: prompts (via inputDouble) for a value and removes its
+//                first occurrence from calc if present.
 static void handleDelete(DescriptiveStatsCalculator& calc) {
-    cout << "Enter value to delete: ";
-    double value;
-    if (!(cin >> value)) {
-        cout << "Invalid value.\n";
-        clearInput();
-        return;
-    }
+    double value = inputDouble("Enter value to delete: ");
     if (calc.deleteValue(value)) {
         cout << "Deleted " << value << ". Dataset is now: ";
         calc.displayDataset();
@@ -94,32 +86,22 @@ static void handleDelete(DescriptiveStatsCalculator& calc) {
 }
 
 // Precondition:  none.
-// Postcondition: prompts the user to choose Sample or Population and
-//                configures calc accordingly.
+// Postcondition: prompts (via inputInteger with a fixed range) for
+//                Sample(1) or Population(2) and configures calc.
 static void handleConfigure(DescriptiveStatsCalculator& calc) {
-    cout << "Configure dataset as (1) Sample or (2) Population: ";
-    int choice;
-    if (!(cin >> choice)) {
-        cout << "Invalid choice.\n";
-        clearInput();
-        return;
-    }
+    int choice = inputInteger("Configure dataset as (1) Sample or (2) Population: ", 1, 2);
     if (choice == 1) {
         calc.configureDatasetType(DescriptiveStatsCalculator::DatasetType::SAMPLE);
         cout << "Dataset configured as Sample.\n";
     }
-    else if (choice == 2) {
+    else {
         calc.configureDatasetType(DescriptiveStatsCalculator::DatasetType::POPULATION);
         cout << "Dataset configured as Population.\n";
-    }
-    else {
-        cout << "Invalid choice, dataset type unchanged.\n";
     }
 }
 
 int main() {
     DescriptiveStatsCalculator calc;
-    string option;
     bool running = true;
 
     while (running) {
@@ -132,53 +114,160 @@ int main() {
 
         printMenu();
 
-        if (!(cin >> option)) {
-            break; // EOF or stream failure
-        }
-
-        // Normalize a single-character option to uppercase for comparison.
-        char opt = option.empty() ? '\0' : static_cast<char>(toupper(option[0]));
+        char opt = inputChar("Option: ", VALID_MENU_OPTIONS);
 
         switch (opt) {
-        case '0': running = false; cout << "Goodbye!\n"; break;
-        case '1': handleConfigure(calc); break;
-        case '2': handleInsert(calc); break;
-        case '3': handleDelete(calc); break;
+        case '0':
+            running = false;
+            cout << "Goodbye!\n";
+            break;
 
-        case 'A': calc.findMinimum(); break;
-        case 'B': calc.findMaximum(); break;
-        case 'C': calc.findRange(); break;
-        case 'D': cout << "Size: " << calc.findSize() << endl; break;
-        case 'E': calc.findSum(); break;
-        case 'F': calc.findMean(); break;
-        case 'G': calc.findMedian(); break;
-        case 'H': { double* modes = nullptr; calc.findModes(modes); delete[] modes; break; }
-        case 'I': calc.findStandardDeviation(); break;
-        case 'J': calc.findVariance(); break;
-        case 'K': calc.findMidrange(); break;
-        case 'L': { double q1, q2, q3; calc.findQuartiles(q1, q2, q3); break; }
-        case 'M': calc.findInterquartileRange(); break;
-        case 'N': { double* outliers = nullptr; calc.findOutliers(outliers); delete[] outliers; break; }
-        case 'O': calc.findSumOfSquares(); break;
-        case 'P': calc.findMeanAbsoluteDeviation(); break;
-        case 'Q': calc.findRootMeanSquare(); break;
-        case 'R': calc.findStandardErrorOfMean(); break;
-        case 'S': calc.findSkewness(); break;
-        case 'T': calc.findKurtosis(); break;
-        case 'U': calc.findKurtosisExcess(); break;
-        case 'V': calc.findCoefficientOfVariation(); break;
-        case 'W': calc.findRelativeStandardDeviation(); break;
+        case '1':
+            handleConfigure(calc);
+            break;
+
+        case '2':
+            handleInsert(calc);
+            break;
+
+        case '3':
+            handleDelete(calc);
+            break;
+
+        case 'A':
+            if (hasEnoughData(calc, 1, "Find Minimum")) {
+                cout << "Minimum: " << calc.findMinimum() << endl;
+            }
+            break;
+
+        case 'B':
+            if (hasEnoughData(calc, 1, "Find Maximum")) {
+                cout << "Maximum: " << calc.findMaximum() << endl;
+            }
+            break;
+
+        case 'C':
+            if (hasEnoughData(calc, 1, "Find Range")) {
+                cout << "Range: " << calc.findRange() << endl;
+            }
+            break;
+
+        case 'D':
+            cout << "Size: " << calc.findSize() << endl;
+            break;
+
+        case 'E':
+            if (hasEnoughData(calc, 1, "Find Sum"))
+                cout << "Sum: " << calc.findSum() << endl;
+            break;
+        case 'F':
+            if (hasEnoughData(calc, 1, "Find Mean"))
+                cout << "Mean: " << calc.findMean() << endl;
+            break;
+        case 'G':
+            if (hasEnoughData(calc, 1, "Find Median"))
+                cout << "Median: " << calc.findMedian() << endl;
+            break;
+        case 'H': {
+            if (hasEnoughData(calc, 1, "Find Modes")) {
+                double* modes = nullptr;
+                int count = calc.findModes(modes);
+                cout << "Mode(s) [" << count << "]: ";
+                for (int i = 0; i < count; ++i) {
+                    cout << modes[i];
+                    if (i < count - 1) cout << ", ";
+                }
+                cout << endl;
+                delete[] modes;
+            }
+            break;
+        }
+        case 'I':
+            if (hasEnoughData(calc, 2, "Find Standard Deviation"))
+                cout << "Standard Deviation: " << calc.findStandardDeviation() << endl;
+            break;
+        case 'J':
+            if (hasEnoughData(calc, 2, "Find Variance"))
+                cout << "Variance: " << calc.findVariance() << endl;
+            break;
+        case 'K':
+            if (hasEnoughData(calc, 1, "Find Midrange"))
+                cout << "Midrange: " << calc.findMidrange() << endl;
+            break;
+        case 'L': {
+            if (hasEnoughData(calc, 4, "Find Quartiles")) {
+                double q1, q2, q3;
+                calc.findQuartiles(q1, q2, q3);
+                cout << "Q1: " << q1 << "  Q2: " << q2 << "  Q3: " << q3 << endl;
+            }
+            break;
+        }
+        case 'M':
+            if (hasEnoughData(calc, 4, "Find Interquartile Range"))
+                cout << "IQR: " << calc.findInterquartileRange() << endl;
+            break;
+        case 'N': {
+            if (hasEnoughData(calc, 4, "Find Outliers")) {
+                double* outliers = nullptr;
+                int count = calc.findOutliers(outliers);
+                cout << "Outliers [" << count << "]: ";
+                for (int i = 0; i < count; ++i) {
+                    cout << outliers[i];
+                    if (i < count - 1) cout << ", ";
+                }
+                cout << endl;
+                delete[] outliers;
+            }
+            break;
+        }
+        case 'O':
+            if (hasEnoughData(calc, 1, "Find Sum of Squares"))
+                cout << "Sum of Squares: " << calc.findSumOfSquares() << endl;
+            break;
+        case 'P':
+            if (hasEnoughData(calc, 1, "Find Mean Absolute Deviation"))
+                cout << "Mean Absolute Deviation: " << calc.findMeanAbsoluteDeviation() << endl;
+            break;
+        case 'Q':
+            if (hasEnoughData(calc, 1, "Find Root Mean Square"))
+                cout << "Root Mean Square: " << calc.findRootMeanSquare() << endl;
+            break;
+        case 'R':
+            if (hasEnoughData(calc, 2, "Find Standard Error of Mean"))
+                cout << "Standard Error of Mean: " << calc.findStandardErrorOfMean() << endl;
+            break;
+        case 'S':
+            if (hasEnoughData(calc, 3, "Find Skewness"))
+                cout << "Skewness: " << calc.findSkewness() << endl;
+            break;
+        case 'T':
+            if (hasEnoughData(calc, 4, "Find Kurtosis"))
+                cout << "Kurtosis: " << calc.findKurtosis() << endl;
+            break;
+        case 'U':
+            if (hasEnoughData(calc, 4, "Find Kurtosis Excess"))
+                cout << "Kurtosis Excess: " << calc.findKurtosisExcess() << endl;
+            break;
+        case 'V':
+            if (hasEnoughData(calc, 2, "Find Coefficient of Variation"))
+                cout << "Coefficient of Variation: " << calc.findCoefficientOfVariation() << endl;
+            break;
+        case 'W':
+            if (hasEnoughData(calc, 2, "Find Relative Standard Deviation"))
+                cout << "Relative Standard Deviation: " << calc.findRelativeStandardDeviation() << "%" << endl;
+            break;
         case 'X': calc.displayFrequencyTable(); break;
         case 'Y': calc.displayAllStatisticalResults(); break;
         case 'Z': {
-            cout << "Output filename: ";
-            string filename;
-            cin >> filename;
+            string filename = inputString("Output filename: ", false);
             calc.outputAllStatisticalResultsToFile(filename);
             break;
         }
 
         default:
+            // Unreachable: inputChar() already restricts input to
+            // VALID_MENU_OPTIONS before returning, so every valid case
+            // above is exhaustive. Kept only as a defensive fallback.
             cout << "Invalid option. Please try again.\n";
             break;
         }

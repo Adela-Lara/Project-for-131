@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|solutionrelative:Project chapter 1\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\DescriptiveStatsCalculator.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|solutionrelative:Project chapter 1\\DescriptiveStatsCalculator.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|solutionrelative:Project chapter 1\\input.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\DescriptiveStatsCalculator.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|solutionrelative:Project chapter 1\\DescriptiveStatsCalculator.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{EF678A4A-E71A-4DC1-A2E5-41F4032CC1FA}|Project chapter 1\\Project chapter 1.vcxproj|solutionrelative:Project chapter 1\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,37 +30,52 @@
           "Children": [
             {
               "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "input.h",
+              "DocumentMoniker": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\input.h",
+              "RelativeDocumentMoniker": "Project chapter 1\\input.h",
+              "ToolTip": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\input.h",
+              "RelativeToolTip": "Project chapter 1\\input.h",
+              "ViewState": "AgIAADEBAAAAAAAAAAAAwFcBAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2026-08-18T13:27:00.646Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 2,
               "Title": "DescriptiveStatsCalculator.h",
               "DocumentMoniker": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\DescriptiveStatsCalculator.h",
               "RelativeDocumentMoniker": "Project chapter 1\\DescriptiveStatsCalculator.h",
               "ToolTip": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\DescriptiveStatsCalculator.h",
               "RelativeToolTip": "Project chapter 1\\DescriptiveStatsCalculator.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAOwAAAAAAAAAAAAAwBIBAAAoAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2026-08-17T23:22:11.163Z"
+              "WhenOpened": "2026-08-17T23:22:11.163Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "DescriptiveStatsCalculator.cpp",
               "DocumentMoniker": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\DescriptiveStatsCalculator.cpp",
               "RelativeDocumentMoniker": "Project chapter 1\\DescriptiveStatsCalculator.cpp",
               "ToolTip": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\DescriptiveStatsCalculator.cpp",
               "RelativeToolTip": "Project chapter 1\\DescriptiveStatsCalculator.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAK8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABcBAAAAAAAAAAAAwE8BAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2026-08-17T23:09:33.454Z"
+              "WhenOpened": "2026-08-17T23:09:33.454Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\main.cpp",
               "RelativeDocumentMoniker": "Project chapter 1\\main.cpp",
               "ToolTip": "C:\\Users\\takag\\source\\repos\\Project chapter 1\\Project chapter 1\\main.cpp",
               "RelativeToolTip": "Project chapter 1\\main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAZAAAAAAAAAA==",
+              "ViewState": "AgIAAKEAAAAAAAAAAAAAwMcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-08-17T23:05:51.226Z",
               "EditorCaption": ""

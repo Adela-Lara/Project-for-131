@@ -4,10 +4,6 @@
 // A container class that stores numeric data in a dynamically allocated,
 // sorted (ascending) array and computes descriptive statistics on it.
 //
-// Container requirements satisfied:
-//   - Uses new[] / delete[] directly (no std::vector, no std::array).
-//   - Values are kept in sorted (ascending) order at all times, so every
-//     insertion places the new value into its correct sorted position.
 // ============================================================================
 
 #ifndef DESCRIPTIVE_STATS_CALCULATOR_H
