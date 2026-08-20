@@ -1,17 +1,9 @@
-// ============================================================================
-// DescriptiveStatsCalculator.cpp
-//
-// Container logic (constructors, insert, delete, resize) is fully
-// implemented below. Statistical functions (findMinimum ... 
-// outputAllStatisticalResultsToFile) are intentionally left as stubs that
-// print "[Not yet implemented]" so the menu compiles and runs end-to-end
-// while those pieces are filled in one at a time.
-// ============================================================================
-
 #include "DescriptiveStatsCalculator.h"
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <iomanip>
+#include <algorithm>
 
 using std::cout;
 using std::cerr;
@@ -43,7 +35,7 @@ DescriptiveStatsCalculator::DescriptiveStatsCalculator(const DescriptiveStatsCal
 
 DescriptiveStatsCalculator& DescriptiveStatsCalculator::operator=(const DescriptiveStatsCalculator& other) {
     if (this == &other) {
-        return *this; // guard against self-assignment
+        return *this;
     }
     double* newData = new double[other.capacity];
     for (int i = 0; i < other.size; ++i) {
@@ -63,7 +55,7 @@ DescriptiveStatsCalculator::~DescriptiveStatsCalculator() {
 }
 
 // ---------------------------------------------------------------------
-// Container / configuration operations
+// Container / Configuration Operations
 // ---------------------------------------------------------------------
 
 void DescriptiveStatsCalculator::configureDatasetType(DatasetType type) {
@@ -76,7 +68,7 @@ DescriptiveStatsCalculator::DatasetType DescriptiveStatsCalculator::getDatasetTy
 
 void DescriptiveStatsCalculator::resize(int newCapacity) {
     if (newCapacity < size) {
-        newCapacity = size; // never shrink below current element count
+        newCapacity = size;
     }
     double* newData = new double[newCapacity];
     for (int i = 0; i < size; ++i) {
@@ -89,7 +81,7 @@ void DescriptiveStatsCalculator::resize(int newCapacity) {
 
 int DescriptiveStatsCalculator::findInsertPosition(double value) const {
     int low = 0;
-    int high = size; // upper bound is one-past-the-end
+    int high = size;
     while (low < high) {
         int mid = low + (high - low) / 2;
         if (data[mid] < value) {
@@ -135,10 +127,11 @@ bool DescriptiveStatsCalculator::deleteValue(double value) {
 }
 
 int DescriptiveStatsCalculator::deleteAllOccurrences(double value) {
+    const double EPSILON = 1e-9;
     int removed = 0;
     int writeIndex = 0;
     for (int readIndex = 0; readIndex < size; ++readIndex) {
-        if (data[readIndex] == value) {
+        if (std::abs(data[readIndex] - value) < EPSILON) {
             ++removed;
         }
         else {
@@ -146,6 +139,24 @@ int DescriptiveStatsCalculator::deleteAllOccurrences(double value) {
         }
     }
     size = writeIndex;
+    return removed;
+}
+
+int DescriptiveStatsCalculator::deleteRange(double start, double end) {
+    if (start > end) {
+        std::swap(start, end);
+    }
+    int newSize = 0;
+    int removed = 0;
+    for (int i = 0; i < size; ++i) {
+        if (data[i] >= start && data[i] <= end) {
+            ++removed;
+        }
+        else {
+            data[newSize++] = data[i];
+        }
+    }
+    size = newSize;
     return removed;
 }
 
@@ -163,15 +174,18 @@ int DescriptiveStatsCalculator::getSize() const {
 
 void DescriptiveStatsCalculator::displayDataset() const {
     if (size == 0) {
-        cout << "(Dataset is empty)" << endl;
+        cout << "(empty)\n";
         return;
     }
-    cout << "[ ";
+    const int perLine = 15;
+    cout << "\n\t";
     for (int i = 0; i < size; ++i) {
-        cout << data[i];
-        if (i < size - 1) cout << ", ";
+        cout << std::setw(6) << data[i];
+        if ((i + 1) % perLine == 0 && i != size - 1) {
+            cout << "\n\t";
+        }
     }
-    cout << " ]" << endl;
+    cout << "\n";
 }
 
 const double* DescriptiveStatsCalculator::getArrayAddress() const {
@@ -179,160 +193,393 @@ const double* DescriptiveStatsCalculator::getArrayAddress() const {
 }
 
 // ---------------------------------------------------------------------
-// Statistical functions -- STUBS (prototypes only, to be implemented)
-//
-// Each stub reports that it is not yet implemented and returns a
-// harmless default value so the program compiles and the menu can be
-// exercised end-to-end before the math is filled in.
+// Statistical Functions
 // ---------------------------------------------------------------------
 
 double DescriptiveStatsCalculator::findMinimum() const {
-    // Precondition: size >= 1 (enforced by caller via a size check before
-    // calling this; this defensive check exists in case that contract is
-    // ever violated, so we fail loudly instead of reading out-of-bounds).
-    if (size < 1) {
-        cerr << "ERROR: findMinimum requires at least 1 value in the dataset." << endl;
-        return 0.0;
-    }
-    // Postcondition: data[] is kept sorted ascending at all times by
-    // insertValue(), so the minimum is always the first element -- no
-    // scan or sort needed, just read index 0.
+    if (size < 1) return 0.0;
     return data[0];
 }
 
 double DescriptiveStatsCalculator::findMaximum() const {
-    // Precondition: size >= 1.
-    if (size < 1) {
-        cerr << "ERROR: findMaximum requires at least 1 value in the dataset." << endl;
-        return 0.0;
-    }
-    // Postcondition: since data[] is sorted ascending, the maximum is
-    // always the last occupied element, data[size - 1].
+    if (size < 1) return 0.0;
     return data[size - 1];
 }
 
 double DescriptiveStatsCalculator::findRange() const {
-    // Precondition: size >= 1.
-    if (size < 1) {
-        cerr << "ERROR: findRange requires at least 1 value in the dataset." << endl;
-        return 0.0;
-    }
-    // Postcondition: range = max - min. Reuses findMaximum()/findMinimum()
-    // rather than duplicating the O(1) sorted-array lookups.
+    if (size < 1) return 0.0;
     return findMaximum() - findMinimum();
 }
 
 int DescriptiveStatsCalculator::findSize() const {
-    return size; // trivial pass-through, safe to leave implemented
+    return size;
 }
 
 double DescriptiveStatsCalculator::findSum() const {
-    cout << "[Not yet implemented: findSum]" << endl;
-    return 0.0;
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        sum += data[i];
+    }
+    return sum;
 }
 
 double DescriptiveStatsCalculator::findMean() const {
-    cout << "[Not yet implemented: findMean]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    return findSum() / size;
 }
 
 double DescriptiveStatsCalculator::findMedian() const {
-    cout << "[Not yet implemented: findMedian]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    if (size % 2 == 1) {
+        return data[size / 2];
+    }
+    return (data[size / 2 - 1] + data[size / 2]) / 2.0;
 }
 
 int DescriptiveStatsCalculator::findModes(double*& modes) const {
-    cout << "[Not yet implemented: findModes]" << endl;
     modes = nullptr;
-    return 0;
-}
+    if (size == 0) return 0;
 
-double DescriptiveStatsCalculator::findStandardDeviation() const {
-    cout << "[Not yet implemented: findStandardDeviation]" << endl;
-    return 0.0;
+    const double EPSILON = 1e-9;
+    int maxFreq = 1, currentFreq = 1;
+    for (int i = 1; i < size; ++i) {
+        if (std::abs(data[i] - data[i - 1]) < EPSILON) {
+            currentFreq++;
+        }
+        else {
+            if (currentFreq > maxFreq) maxFreq = currentFreq;
+            currentFreq = 1;
+        }
+    }
+    if (currentFreq > maxFreq) maxFreq = currentFreq;
+
+    if (maxFreq == 1) {
+        return 0;
+    }
+
+    int modeCount = 0;
+    currentFreq = 1;
+    for (int i = 1; i < size; ++i) {
+        if (std::abs(data[i] - data[i - 1]) < EPSILON) {
+            currentFreq++;
+        }
+        else {
+            if (currentFreq == maxFreq) modeCount++;
+            currentFreq = 1;
+        }
+    }
+    if (currentFreq == maxFreq) modeCount++;
+
+    modes = new double[modeCount];
+    int k = 0;
+    currentFreq = 1;
+    for (int i = 1; i < size; ++i) {
+        if (std::abs(data[i] - data[i - 1]) < EPSILON) {
+            currentFreq++;
+        }
+        else {
+            if (currentFreq == maxFreq) modes[k++] = data[i - 1];
+            currentFreq = 1;
+        }
+    }
+    if (currentFreq == maxFreq) modes[k++] = data[size - 1];
+
+    return modeCount;
 }
 
 double DescriptiveStatsCalculator::findVariance() const {
-    cout << "[Not yet implemented: findVariance]" << endl;
-    return 0.0;
+    if (size < 2) return 0.0;
+    double mean = findMean();
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        double diff = data[i] - mean;
+        sum += diff * diff;
+    }
+    double denom = (datasetType == DatasetType::SAMPLE) ? (size - 1) : size;
+    return sum / denom;
+}
+
+double DescriptiveStatsCalculator::findStandardDeviation() const {
+    return std::sqrt(findVariance());
 }
 
 double DescriptiveStatsCalculator::findMidrange() const {
-    cout << "[Not yet implemented: findMidrange]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    return (findMinimum() + findMaximum()) / 2.0;
+}
+
+double DescriptiveStatsCalculator::medianInRange(int lo, int hi) const {
+    int len = hi - lo;
+    if (len <= 0) return 0.0;
+    if (len % 2 == 1) {
+        return data[lo + len / 2];
+    }
+    return (data[lo + len / 2 - 1] + data[lo + len / 2]) / 2.0;
 }
 
 void DescriptiveStatsCalculator::findQuartiles(double& q1, double& q2, double& q3) const {
-    cout << "[Not yet implemented: findQuartiles]" << endl;
-    q1 = q2 = q3 = 0.0;
+    if (size == 0) {
+        q1 = q2 = q3 = 0.0;
+        return;
+    }
+    q2 = findMedian();
+    int mid = size / 2;
+    q1 = medianInRange(0, mid);
+    if (size % 2 == 0) {
+        q3 = medianInRange(mid, size);
+    }
+    else {
+        q3 = medianInRange(mid + 1, size);
+    }
 }
 
 double DescriptiveStatsCalculator::findInterquartileRange() const {
-    cout << "[Not yet implemented: findInterquartileRange]" << endl;
-    return 0.0;
+    double q1 = 0, q2 = 0, q3 = 0;
+    findQuartiles(q1, q2, q3);
+    return q3 - q1;
 }
 
 int DescriptiveStatsCalculator::findOutliers(double*& outliers) const {
-    cout << "[Not yet implemented: findOutliers]" << endl;
     outliers = nullptr;
-    return 0;
+    if (size < 4) return 0;
+
+    double q1 = 0, q2 = 0, q3 = 0;
+    findQuartiles(q1, q2, q3);
+    double iqr = q3 - q1;
+    double lowerFence = q1 - 1.5 * iqr;
+    double upperFence = q3 + 1.5 * iqr;
+
+    int count = 0;
+    for (int i = 0; i < size; ++i) {
+        if (data[i] < lowerFence || data[i] > upperFence) {
+            count++;
+        }
+    }
+    if (count == 0) return 0;
+
+    outliers = new double[count];
+    int k = 0;
+    for (int i = 0; i < size; ++i) {
+        if (data[i] < lowerFence || data[i] > upperFence) {
+            outliers[k++] = data[i];
+        }
+    }
+    return count;
 }
 
 double DescriptiveStatsCalculator::findSumOfSquares() const {
-    cout << "[Not yet implemented: findSumOfSquares]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    double mean = findMean();
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        double diff = data[i] - mean;
+        sum += diff * diff;
+    }
+    return sum;
 }
 
 double DescriptiveStatsCalculator::findMeanAbsoluteDeviation() const {
-    cout << "[Not yet implemented: findMeanAbsoluteDeviation]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    double mean = findMean();
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        sum += std::abs(data[i] - mean);
+    }
+    return sum / size;
 }
 
 double DescriptiveStatsCalculator::findRootMeanSquare() const {
-    cout << "[Not yet implemented: findRootMeanSquare]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    double sumSq = 0.0;
+    for (int i = 0; i < size; ++i) {
+        sumSq += data[i] * data[i];
+    }
+    return std::sqrt(sumSq / size);
 }
 
 double DescriptiveStatsCalculator::findStandardErrorOfMean() const {
-    cout << "[Not yet implemented: findStandardErrorOfMean]" << endl;
-    return 0.0;
+    if (size == 0) return 0.0;
+    return findStandardDeviation() / std::sqrt(size);
 }
 
 double DescriptiveStatsCalculator::findSkewness() const {
-    cout << "[Not yet implemented: findSkewness]" << endl;
-    return 0.0;
+    if (size < 3) return 0.0;
+    double mean = findMean();
+    double stdev = findStandardDeviation();
+    if (stdev == 0.0) return 0.0;
+
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        double z = (data[i] - mean) / stdev;
+        sum += z * z * z;
+    }
+
+    if (datasetType == DatasetType::SAMPLE) {
+        return (static_cast<double>(size) / ((size - 1.0) * (size - 2.0))) * sum;
+    }
+    else {
+        return sum / size;
+    }
 }
 
 double DescriptiveStatsCalculator::findKurtosis() const {
-    cout << "[Not yet implemented: findKurtosis]" << endl;
-    return 0.0;
+    if (size < 4) return 0.0;
+    double mean = findMean();
+    double stdev = findStandardDeviation();
+    if (stdev == 0.0) return 0.0;
+
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        double diff = data[i] - mean;
+        sum += diff * diff * diff * diff;
+    }
+
+    if (datasetType == DatasetType::SAMPLE) {
+        double factor = (static_cast<double>(size) * (size + 1.0)) /
+                        ((size - 1.0) * (size - 2.0) * (size - 3.0));
+        return factor * (sum / std::pow(stdev, 4));
+    }
+    else {
+        return sum / (size * std::pow(stdev, 4));
+    }
 }
 
 double DescriptiveStatsCalculator::findKurtosisExcess() const {
-    cout << "[Not yet implemented: findKurtosisExcess]" << endl;
-    return 0.0;
+    if (size < 4) return 0.0;
+    double mean = findMean();
+    double stdev = findStandardDeviation();
+    if (stdev == 0.0) return 0.0;
+
+    double sum = 0.0;
+    for (int i = 0; i < size; ++i) {
+        double z = (data[i] - mean) / stdev;
+        sum += z * z * z * z;
+    }
+
+    if (datasetType == DatasetType::POPULATION) {
+        return (sum / size) - 3.0;
+    }
+    else {
+        double numerator = (static_cast<double>(size) * (size + 1.0) /
+                           ((size - 1.0) * (size - 2.0) * (size - 3.0))) * sum;
+        double correction = 3.0 * std::pow(size - 1.0, 2) / ((size - 2.0) * (size - 3.0));
+        return numerator - correction;
+    }
 }
 
 double DescriptiveStatsCalculator::findCoefficientOfVariation() const {
-    cout << "[Not yet implemented: findCoefficientOfVariation]" << endl;
-    return 0.0;
+    double mean = findMean();
+    if (std::abs(mean) < 1e-9) return 0.0;
+    return findStandardDeviation() / mean;
 }
 
 double DescriptiveStatsCalculator::findRelativeStandardDeviation() const {
-    cout << "[Not yet implemented: findRelativeStandardDeviation]" << endl;
-    return 0.0;
+    return findCoefficientOfVariation() * 100.0;
 }
 
-void DescriptiveStatsCalculator::displayFrequencyTable() const {
-    cout << "[Not yet implemented: displayFrequencyTable]" << endl;
+void DescriptiveStatsCalculator::displayFrequencyTable(std::ostream& out) const {
+    if (size == 0) {
+        out << "\n\tNo data to display.\n";
+        return;
+    }
+    const double EPSILON = 1e-9;
+    out << std::right << std::setw(13) << "Value"
+        << std::setw(14) << "Frequency"
+        << std::setw(14) << "Frequency %" << std::endl;
+
+    int i = 0;
+    while (i < size) {
+        double val = data[i];
+        int count = 1;
+        while (i + count < size && std::abs(data[i + count] - val) < EPSILON) {
+            count++;
+        }
+        double percent = (count * 100.0) / size;
+        out << std::right << std::setw(13) << val
+            << std::setw(14) << count
+            << std::setw(14) << std::fixed << std::setprecision(1) << percent << std::endl;
+        i += count;
+    }
 }
 
-void DescriptiveStatsCalculator::displayAllStatisticalResults() const {
-    cout << "[Not yet implemented: displayAllStatisticalResults]" << endl;
+void DescriptiveStatsCalculator::displayAllStatisticalResults(std::ostream& out) const {
+    if (size == 0) {
+        out << "\n\tDataset is empty.\n";
+        return;
+    }
+
+    out << "\n\tMinimum \t\t\t = " << findMinimum();
+    out << "\n\tMaximum \t\t\t = " << findMaximum();
+    out << "\n\tRange \t\t\t\t = " << findRange();
+    out << "\n\tSize \t\t\t\t = " << getSize();
+    out << "\n\tSum \t\t\t\t = " << findSum();
+    out << "\n\tMean \t\t\t\t = " << findMean();
+    out << "\n\tMedian \t\t\t\t = " << findMedian();
+
+    double* modes = nullptr;
+    int modeCount = findModes(modes);
+    out << "\n\tMode(s) \t\t\t = ";
+    if (modeCount == 0 || modes == nullptr) {
+        out << "No mode (all values unique)";
+    }
+    else {
+        for (int i = 0; i < modeCount; ++i) {
+            if (i > 0) out << " ";
+            out << modes[i];
+        }
+    }
+    if (modes) delete[] modes;
+
+    out << "\n\tStandard Deviation \t\t = " << findStandardDeviation();
+    out << "\n\tVariance \t\t\t = " << findVariance();
+    out << "\n\tMidrange \t\t\t = " << findMidrange();
+
+    double q1 = 0, q2 = 0, q3 = 0;
+    findQuartiles(q1, q2, q3);
+    out << "\n\tQuartiles \t\t\t Quartiles:";
+    out << "\n\t\t\t\t\t Q1 --> " << std::fixed << std::setprecision(1) << q1;
+    out << "\n\t\t\t\t\t Q2 --> " << std::fixed << std::setprecision(1) << q2;
+    out << "\n\t\t\t\t\t Q3 --> " << std::fixed << std::setprecision(1) << q3;
+
+    out << "\n\tInterquartile Range \t\t = " << findInterquartileRange();
+
+    double* outliers = nullptr;
+    int outlierCount = findOutliers(outliers);
+    out << "\n\tOutliers \t\t\t = ";
+    if (size < 4) {
+        out << "unknown";
+    }
+    else if (outlierCount == 0 || outliers == nullptr) {
+        out << "none";
+    }
+    else {
+        for (int i = 0; i < outlierCount; ++i) {
+            if (i > 0) out << " ";
+            out << outliers[i];
+        }
+    }
+    if (outliers) delete[] outliers;
+
+    out << "\n\tSum of Squares \t\t\t = " << findSumOfSquares();
+    out << "\n\tMean Absolute Deviation \t = " << findMeanAbsoluteDeviation();
+    out << "\n\tRoot Mean Square \t\t = " << findRootMeanSquare();
+    out << "\n\tStandard Error of the Mean \t = " << findStandardErrorOfMean();
+    out << "\n\tSkewness \t\t\t = " << findSkewness();
+    out << "\n\tKurtosis \t\t\t = " << findKurtosis();
+    out << "\n\tKurtosis Excess \t\t = " << findKurtosisExcess();
+    out << "\n\tCoefficient of Variation \t = " << findCoefficientOfVariation();
+    out << "\n\tRelative Standard Deviation \t = " << findRelativeStandardDeviation();
+
+    out << "\n\n\tFrequency Table\n";
+    displayFrequencyTable(out);
 }
 
-bool DescriptiveStatsCalculator::outputAllStatisticalResultsToFile(const string& filename) const {
-    cout << "[Not yet implemented: outputAllStatisticalResultsToFile]" << endl;
-    (void)filename;
-    return false;
+bool DescriptiveStatsCalculator::outputAllStatisticalResultsToFile(const std::string& filename) const {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        return false;
+    }
+    displayAllStatisticalResults(file);
+    file.close();
+    return true;
 }
