@@ -221,14 +221,17 @@ int DescriptiveStatsCalculator::findSize() const {
 
 double DescriptiveStatsCalculator::findSum() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findSum]\n";
-    return 0.0;
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        sum += data[i];
+    }
+    return sum;
 }
 
 double DescriptiveStatsCalculator::findMean() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findMean]\n";
-    return 0.0;
+    return findSum() / size;
+    
 }
 
 double DescriptiveStatsCalculator::findMedian() const {
@@ -246,8 +249,23 @@ int DescriptiveStatsCalculator::findModes(double*& modes) const {
 
 double DescriptiveStatsCalculator::findStandardDeviation() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findStandardDeviation]\n";
-    return 0.0;
+    double mean = findMean();
+    double sum = 0.0;
+
+    for (int i = 0; i < size; i++) {
+        double difference = data[i] - mean;
+        sum += difference * difference;
+    }
+    if (datasetType == DatasetType::SAMPLE) {
+        double variance = sum / (size - 1);
+        double standardDeviationSample = std::sqrt(variance);
+        return standardDeviationSample;
+    }
+    else {
+        double variance = sum / size;
+        double standardDeviationPop = std::sqrt(variance);
+        return standardDeviationPop;
+    }
 }
 
 double DescriptiveStatsCalculator::findVariance() const {
@@ -295,32 +313,106 @@ double DescriptiveStatsCalculator::findMeanAbsoluteDeviation() const {
 
 double DescriptiveStatsCalculator::findRootMeanSquare() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findRootMeanSquare]\n";
-    return 0.0;
+    if (size == 0)
+        return 0;
+    double sum = 0.0;
+    for (int i = 0; i < size; i++) {
+        double sumOfSquare = data[i] * data[i];
+        sum += sumOfSquare;
+    }
+    return std::sqrt(sum / size);
 }
 
 double DescriptiveStatsCalculator::findStandardErrorOfMean() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findStandardErrorOfMean]\n";
-    return 0.0;
+    if (size == 0)
+        return 0.0;
+
+    return findStandardDeviation() / std::sqrt(size);
 }
 
 double DescriptiveStatsCalculator::findSkewness() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findSkewness]\n";
-    return 0.0;
+    double mean = findMean();
+    double stdDev = findStandardDeviation();
+    double sum = 0.0;
+    int n = size;
+    if (size < 3)
+        return 0;
+    if (stdDev == 0)
+        return 0.0;
+
+    if (datasetType == DatasetType::SAMPLE) {
+        for (int i = 0; i < size; i++) {
+            double difference = data[i] - mean;
+            double division = difference / stdDev;
+
+            sum += division * division * division;
+        }
+
+        double numerator = static_cast<double>(n);
+        double denominator = static_cast<double>(n - 1) * (n - 2);
+        double equationOfN = numerator / denominator;
+        return sum * equationOfN;
+    }
+    else {
+        double sum = 0.0;
+        for (int i = 0; i < size; i++) {
+            double difference = data[i] - mean;
+            sum += difference * difference * difference;
+
+        }
+        double standardDiviationFourth = stdDev * stdDev * stdDev;
+        return (sum / (size * standardDiviationFourth));
+    }
 }
 
 double DescriptiveStatsCalculator::findKurtosis() const {
-    // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findKurtosis]\n";
-    return 0.0;
+    double mean = findMean();
+    double stdDev = findStandardDeviation();
+    double sum = 0.0;
+    int n = size;
+    if (size < 4)
+        return 0;
+
+    if (datasetType == DatasetType::SAMPLE) {
+        for (int i = 0; i < size; i++) {
+            double difference = (data[i] - mean);
+            double division = difference / stdDev;
+
+            sum += division * division * division * division;
+        }
+        double numerator = static_cast<double>(n) * (n + 1);
+        double denominator = static_cast<double>(n - 1) * (n - 2) * (n - 3);
+        double equationOfN = numerator / denominator;
+        return  sum * equationOfN;
+    }
+    else {
+        for (int i = 0; i < size; i++) {
+            double difference = data[i] - mean;
+            sum += (difference * difference * difference * difference);
+        }
+        double standardDeviationFourth = stdDev * stdDev * stdDev * stdDev;
+        return (sum / (size * standardDeviationFourth) );
+    }
 }
 
 double DescriptiveStatsCalculator::findKurtosisExcess() const {
     // TODO: To be implemented by team
-    cout << "\n\t[Not yet implemented: findKurtosisExcess]\n";
-    return 0.0;
+    int n = size;
+    if (size > 4)
+        return 0;
+
+    if (datasetType == DatasetType::SAMPLE) {
+        double numerator = static_cast<double>(3) * (n - 1) * (n - 1);
+        double denominator = static_cast<double>(n - 2) * (n - 3);
+        double equationOfN = numerator / denominator;
+
+        return findKurtosis() - equationOfN;
+    }
+    else {
+        return findKurtosis() - 3.0;
+    }
 }
 
 double DescriptiveStatsCalculator::findCoefficientOfVariation() const {
