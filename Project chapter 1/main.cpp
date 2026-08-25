@@ -1,6 +1,8 @@
 // ============================================================================
 // main.cpp
 // Descriptive Statistics Calculator - Chapter 1
+// Group project by : 
+//  Bao Nguyen, Adela Lara, Hibiki Morishita, Phuoc Nguyen, Tan Thanh Nguyen
 // ============================================================================
 
 #include <iostream>
