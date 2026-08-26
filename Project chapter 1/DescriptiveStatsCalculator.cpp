@@ -168,11 +168,11 @@ int DescriptiveStatsCalculator::deleteAllOccurrences(double value) {
     return removed;
 }
 
-// Precondition:  none
+// Precondition:  start <= end
 // Postcondition: removes all values in [start, end]; returns number of elements removed
 int DescriptiveStatsCalculator::deleteRange(double start, double end) {
     if (start > end) {
-        std::swap(start, end);
+        return 0;
     }
     int newSize = 0;
     int removed = 0;
@@ -585,8 +585,9 @@ void DescriptiveStatsCalculator::displayFrequencyTable(std::ostream& out) const 
         return;
     }
 
-    out << "\n\tFrequency Table\n\n";
-    out << "\tValue\tFrequency\tFrequency %\n";
+    out << std::right << std::setw(13) << "Value"
+        << std::setw(14) << "Frequency"
+        << std::setw(14) << "Frequency %" << std::endl;
 
     int i = 0;
     const double EPSILON = 1e-9;
@@ -600,24 +601,17 @@ void DescriptiveStatsCalculator::displayFrequencyTable(std::ostream& out) const 
             frequency++;
         }
 
-        double frequencyPercent = (static_cast<double>(frequency) / size) * 100.0;
-
-        out << "\t"
-            << std::right
-            << std::setw(5) << currentValue
-            << std::setw(12) << frequency;
+        double frequencyPercent = (static_cast<double>(frequency) * 100.0) / size;
 
         std::ios::fmtflags oldFlags = out.flags();
         std::streamsize oldPrecision = out.precision();
 
-        out << std::setw(12)
-            << std::fixed
-            << std::setprecision(2)
-            << frequencyPercent;
+        out << std::right << std::setw(13) << currentValue
+            << std::setw(14) << frequency
+            << std::setw(14) << std::fixed << std::setprecision(1) << frequencyPercent << std::endl;
 
         out.flags(oldFlags);
         out.precision(oldPrecision);
-        out << "\n";
 
         i += frequency;
     }
@@ -631,19 +625,18 @@ void DescriptiveStatsCalculator::displayAllStatisticalResults(std::ostream& out)
         return;
     }
 
-    out << "\n";
-    out << "\tMinimum                     = " << findMinimum() << "\n";
-    out << "\tMaximum                     = " << findMaximum() << "\n";
-    out << "\tRange                       = " << findRange() << "\n";
-    out << "\tSize                        = " << findSize() << "\n";
-    out << "\tSum                         = " << findSum() << "\n";
-    out << "\tMean                        = " << findMean() << "\n";
-    out << "\tMedian                      = " << findMedian() << "\n";
+    out << "\n\tMinimum \t\t\t = " << findMinimum();
+    out << "\n\tMaximum \t\t\t = " << findMaximum();
+    out << "\n\tRange \t\t\t\t = " << findRange();
+    out << "\n\tSize \t\t\t\t = " << findSize();
+    out << "\n\tSum \t\t\t\t = " << findSum();
+    out << "\n\tMean \t\t\t\t = " << findMean();
+    out << "\n\tMedian \t\t\t\t = " << findMedian();
 
     double* modes = nullptr;
     int modeCount = findModes(modes);
 
-    out << "\tMode(s)                     = ";
+    out << "\n\tMode(s) \t\t\t = ";
     if (modeCount > 0 && modes != nullptr) {
         for (int i = 0; i < modeCount; i++) {
             if (i > 0) out << " ";
@@ -653,27 +646,32 @@ void DescriptiveStatsCalculator::displayAllStatisticalResults(std::ostream& out)
     else {
         out << "No mode (all values unique)";
     }
-    out << "\n";
     delete[] modes;
 
-    out << "\tStandard Deviation          = " << findStandardDeviation() << "\n";
-    out << "\tVariance                    = " << findVariance() << "\n";
-    out << "\tMidrange                    = " << findMidrange() << "\n";
+    out << "\n\tStandard Deviation \t\t = " << findStandardDeviation();
+    out << "\n\tVariance \t\t\t = " << findVariance();
+    out << "\n\tMidrange \t\t\t = " << findMidrange();
 
     double q1 = 0.0, q2 = 0.0, q3 = 0.0;
     findQuartiles(q1, q2, q3);
 
-    out << "\tQuartiles                    Quartiles:\n";
-    out << "\t                             Q1 --> " << q1 << "\n";
-    out << "\t                             Q2 --> " << q2 << "\n";
-    out << "\t                             Q3 --> " << q3 << "\n";
+    std::ios::fmtflags oldFlags = out.flags();
+    std::streamsize oldPrecision = out.precision();
 
-    out << "\tInterquartile Range         = " << findInterquartileRange() << "\n";
+    out << "\n\tQuartiles \t\t\t Quartiles:";
+    out << "\n\t\t\t\t\t Q1 --> " << std::fixed << std::setprecision(1) << q1;
+    out << "\n\t\t\t\t\t Q2 --> " << std::fixed << std::setprecision(1) << q2;
+    out << "\n\t\t\t\t\t Q3 --> " << std::fixed << std::setprecision(1) << q3;
+
+    out.flags(oldFlags);
+    out.precision(oldPrecision);
+
+    out << "\n\tInterquartile Range \t\t = " << findInterquartileRange();
 
     double* outliers = nullptr;
     int outlierCount = findOutliers(outliers);
 
-    out << "\tOutliers                    = ";
+    out << "\n\tOutliers \t\t\t = ";
     if (size < 4) {
         out << "unknown";
     }
@@ -686,19 +684,37 @@ void DescriptiveStatsCalculator::displayAllStatisticalResults(std::ostream& out)
             out << outliers[i];
         }
     }
-    out << "\n";
     delete[] outliers;
 
-    out << "\tSum of Squares              = " << findSumOfSquares() << "\n";
-    out << "\tMean Absolute Deviation     = " << findMeanAbsoluteDeviation() << "\n";
-    out << "\tRoot Mean Square            = " << findRootMeanSquare() << "\n";
-    out << "\tStandard Error of the Mean  = " << findStandardErrorOfMean() << "\n";
-    out << "\tSkewness                    = " << findSkewness() << "\n";
-    out << "\tKurtosis                    = " << findKurtosis() << "\n";
-    out << "\tKurtosis Excess             = " << findKurtosisExcess() << "\n";
-    out << "\tCoefficient of Variation    = " << findCoefficientOfVariation() << "\n";
-    out << "\tRelative Standard Deviation = " << findRelativeStandardDeviation() << "\n";
+    out << "\n\tSum of Squares \t\t\t = " << findSumOfSquares();
+    out << "\n\tMean Absolute Deviation \t = " << findMeanAbsoluteDeviation();
+    out << "\n\tRoot Mean Square \t\t = " << findRootMeanSquare();
+    out << "\n\tStandard Error of the Mean \t = " << findStandardErrorOfMean();
+    out << "\n\tSkewness \t\t\t = " << findSkewness();
 
+    out << "\n\tKurtosis \t\t\t = ";
+    if (size < 4) {
+        out << "unknown";
+    }
+    else {
+        out << std::setprecision(9) << findKurtosis();
+    }
+
+    out << "\n\tKurtosis Excess \t\t = ";
+    if (size < 4) {
+        out << "unknown";
+    }
+    else {
+        out << std::setprecision(9) << findKurtosisExcess();
+    }
+
+    out.flags(oldFlags);
+    out.precision(oldPrecision);
+
+    out << "\n\tCoefficient of Variation \t = " << findCoefficientOfVariation();
+    out << "\n\tRelative Standard Deviation \t = " << findRelativeStandardDeviation();
+
+    out << "\n\n\tFrequency Table\n";
     displayFrequencyTable(out);
 }
 

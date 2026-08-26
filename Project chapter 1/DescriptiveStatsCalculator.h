@@ -60,7 +60,7 @@ public:
     // Postcondition: removes all occurrences of value; returns number of elements removed
     int deleteAllOccurrences(double value);
 
-    // Precondition:  none
+    // Precondition:  start <= end
     // Postcondition: removes all values in [start, end]; returns number of elements removed
     int deleteRange(double start, double end);
 
@@ -132,11 +132,11 @@ public:
     // Postcondition: returns midrange (min + max) / 2
     double findMidrange() const;
 
-    // Precondition:  size >= 4
+    // Precondition:  size >= 1
     // Postcondition: sets q1, q2, q3 to the 1st, 2nd, and 3rd quartiles
     void findQuartiles(double& q1, double& q2, double& q3) const;
 
-    // Precondition:  size >= 4
+    // Precondition:  size >= 1
     // Postcondition: returns interquartile range (Q3 - Q1)
     double findInterquartileRange() const;
 
