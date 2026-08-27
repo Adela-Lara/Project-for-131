@@ -1,8 +1,6 @@
 // ============================================================================
 // main.cpp
 // Descriptive Statistics Calculator - Chapter 1
-// Group project by : 
-//  Bao Nguyen, Adela Lara, Hibiki Morishita, Phuoc Nguyen, Tan Thanh Nguyen
 // ============================================================================
 
 #include <iostream>
@@ -137,18 +135,20 @@ int main()
                 break;
 
             case 'L': {
-                if (checkEmpty(calc, 4)) break;
+                if (checkEmpty(calc, 1)) break;
                 double q1 = 0, q2 = 0, q3 = 0;
                 calc.findQuartiles(q1, q2, q3);
                 cout << "\n\tQuartiles  \t\tQuartiles: ";
                 cout << "\n\t\t\t\tQ1 --> " << fixed << setprecision(1) << q1;
                 cout << "\n\t\t\t\tQ2 --> " << fixed << setprecision(1) << q2;
                 cout << "\n\t\t\t\tQ3 --> " << fixed << setprecision(1) << q3;
+                cout.unsetf(ios::fixed);
+                cout << setprecision(6);
                 break;
             }
 
             case 'M':
-                if (checkEmpty(calc, 4)) break;
+                if (checkEmpty(calc, 1)) break;
                 cout << "\n\tInterquartile Range = \t" << calc.findInterquartileRange();
                 break;
 
@@ -196,18 +196,32 @@ int main()
                 break;
 
             case 'S':
-                if (checkEmpty(calc, 3)) break;
+                if (checkEmpty(calc, 1)) break;
                 cout << "\n\tSkewness \t\t = " << calc.findSkewness();
                 break;
 
             case 'T':
-                if (checkEmpty(calc, 4)) break;
-                cout << "\n\tKurtosis \t\t = " << calc.findKurtosis();
+                if (checkEmpty(calc, 1)) break;
+                cout << "\n\tKurtosis \t\t = " << setprecision(9);
+                if (calc.getSize() < 4) {
+                    cout << "unknown";
+                }
+                else {
+                    cout << calc.findKurtosis();
+                }
+                cout << setprecision(6);
                 break;
 
             case 'U':
-                if (checkEmpty(calc, 4)) break;
-                cout << "\n\tKurtosis Excess \t\t = " << calc.findKurtosisExcess();
+                if (checkEmpty(calc, 1)) break;
+                cout << "\n\tKurtosis Excess \t\t = " << setprecision(9);
+                if (calc.getSize() < 4) {
+                    cout << "unknown";
+                }
+                else {
+                    cout << calc.findKurtosisExcess();
+                }
+                cout << setprecision(6);
                 break;
 
             case 'V':
@@ -268,7 +282,7 @@ int main()
 
 void showMenu(const DescriptiveStatsCalculator& calc)
 {
-    if (calc.getSize() < 2)
+    if (calc.getSize() == 0)
     {
         cout << "\n\tERROR: Data Set requires at least 2 values.\n";
     }
@@ -483,6 +497,11 @@ void deleteMenu(DescriptiveStatsCalculator& calc)
         {
             double startVal = inputDouble("\n\tSpecify a starting value to be deleted from the Dataset: ");
             double endVal = inputDouble("\n\tSpecify an ending value to be deleted from the Dataset: ");
+            if (endVal < startVal)
+            {
+                cout << "\n\tERROR: The ending value (" << endVal << ") cannot be smaller than the starting value (" << startVal << ").\n";
+                break;
+            }
             int count = calc.deleteRange(startVal, endVal);
             if (count > 0)
             {
